@@ -3,7 +3,15 @@
  * La semaine 1 est celle contenant le premier jeudi de l'année.
  * La semaine commence le lundi.
  */
+
 import ICAL from 'ical.js';
+import fs from 'fs'
+import { json } from 'stream/consumers';
+import { finishAccumulatingVaryParams } from 'next/dist/server/app-render/vary-params';
+import { get } from 'http';
+import { useState } from 'react';
+
+
 export function getWeekNumber(date: Date): number {
     // Créer une copie en UTC pour éviter les problèmes de fuseau horaire
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -32,4 +40,20 @@ export function pasUnDoublon(event : ICAL.Event) : boolean{
 
 
     return true
+}
+
+
+
+export async function addUrl (nom : string, url : string){
+    await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom: nom, url : url })
+    })
+}
+
+export async function getUrlListe() {
+    const data = await fetch('/api/data')
+      .then(res => res.json())
+ return data.urlListe  
 }

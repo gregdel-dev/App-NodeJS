@@ -4,31 +4,46 @@
 import { useEffect, useState } from 'react';
 
 import { calculerHeuresTotales } from '@/lib/calculs';
-import { Libertinus_Keyboard } from 'next/font/google';
 import  { Heures } from "../lib/types"
+import { addUrl, getUrlListe } from '@/lib/fonctions';
 
 export default function Home() {
   const [url, setUrl] = useState('');
+  const [urlListe, setUrlListe] = useState({})
   
   const [deadline, setDeadline] = useState("2026-04-1");
   const [heures, setHeures] = useState<Heures | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSelecting, setIsSelecting] = useState(true)
+  const [isAdding, setIsAdding]=useState(false)
 
 
   useEffect(() => {
     
     const initiate = async () => {
-      await setUrl("https://api.ecoledirecte.com/v3/ical/E/4956/5a55393456574a43613056565a6a687865546c4f4d31706a576d73764f4864736458424361474633.ics")
+      //await setUrl("https://api.ecoledirecte.com/v3/ical/E/4956/5a55393456574a43613056565a6a687865546c4f4d31706a576d73764f4864736458424361474633.ics")
       await handleCalculate();
+      await fetchUrlListe()
       //setHours(2);
     };
     initiate();
   }, [])
+  const fetchUrlListe = async () => {
+    const urls= await getUrlListe();
+    setUrlListe(urls)
+  }
+  const formSubmit= async (data : FormData)=>{
+    if (data.get("nom") && data.get("url")) await addUrl(data.get("nom") as string, data.get("url") as string)
+    else return
+    await fetchUrlListe()
+    setIsAdding(false)
+    setIsSelecting(true)
+  }
   const handleCalculate = async () => {
-    
+    if (!url) return 
   
-    
+    setIsSelecting(false)
     setLoading(true);
     setError('');
     setHeures(null);
@@ -37,7 +52,7 @@ export default function Home() {
       // Étape 1 : Récupérer le contenu ICS
       // Si vous avez des erreurs CORS ici, il faudra déplacer ce fetch dans une API Route (app/api/fetch-ics/route.ts)
       const urlMoi= "https://api.ecoledirecte.com/v3/ical/E/4956/5a55393456574a43613056565a6a687865546c4f4d31706a576d73764f4864736458424361474633.ics"
-      const response = await fetch(urlMoi);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Impossible de récupérer le fichier ICS. Vérifiez l\'URL ou les restrictions CORS.');
       
       const icsText = await response.text();
@@ -58,6 +73,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-50">
+      
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Compteur d'heures de cours
@@ -65,7 +81,48 @@ export default function Home() {
         <p></p>
         <div className="space-y-4">
           
+        {isSelecting && (
+          <div className='space-y-3'>
+            <div>
+            <p>Emploi du temps</p>
+            <select name="url" onChange={(e) =>setUrl( e.target.value )} className="bg-gray-200 p-2 rounded-lg shadow w-full max-w-md">
+              <option value="">Selectionnez un emploi du temps</option>
+              {Object.entries(urlListe).map(([nom, url]) => (
+                <option value={String(url)}>{nom}</option>
+              ))}
+              <option value="" onClick={()=> {setIsAdding(true); setIsSelecting(false)}}>+ Ajouter un emploi du temps</option>
+              
+            </select>
+            </div>
+              <div>
+            <p>Date de fin</p>
+            <input
+              type="date"
+              defaultValue={new Date(deadline).toISOString().split("T")[0]}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="bg-gray-200 p-2 rounded-lg shadow w-full max-w-md"
+            />
+            </div>
             
+            <button className='bg-blue-500 px-2 rounded-lg shadow text-white' onClick={()=>handleCalculate()}>Calculer </button>
+          </div>
+
+        )}
+        {isAdding && (
+          <form action={formSubmit} className='space-y-3'>
+            <div>
+              <label htmlFor="nom">Nom</label>
+              <input type="text" name="nom" id="nom" required className='bg-gray-200 p-2 rounded-lg shadow w-full max-w-md' />
+            </div>
+            <div>
+              <label htmlFor="url">Url d'emploi du temps</label>
+              <input type="text" name="url" id="url" required className='bg-gray-200 p-2 rounded-lg shadow w-full max-w-md' />
+              <a href="/aide" className='text-sm text-blue-600 underline hover:text-blue-400' target="_blank" rel="noopener noreferrer">Où trouver mon url d'emploi du temps ?</a>
+            </div>
+            <button className='bg-blue-500 px-2 rounded-lg shadow text-white' type='submit'>Enregistrer</button>
+          </form>
+        )}
 
           
 
@@ -79,6 +136,8 @@ export default function Home() {
             
           )}
           {heures !== null && (
+            <div>
+            <button className='bg-blue-500 px-2 rounded-lg shadow text-white mx-16'onClick={()=> {setHeures(null) ; setIsSelecting(true)}}>Choisir un autre emploi du temps</button>
             <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded text-center">
               <p className="text-gray-600">Heures restantes avant le {deadline} :</p>
               <p className="text-4 font-bold text-green-700">Total : {heures?.total} h</p>
@@ -92,6 +151,7 @@ export default function Home() {
                 </p>
               ))}
               
+            </div>
             </div>
           )}
 
