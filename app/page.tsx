@@ -17,26 +17,27 @@ export default function Home() {
   const [isSelecting, setIsSelecting] = useState(true)
   const [isAdding, setIsAdding]=useState(false)
   const [nom, setNom]=useState("")
-  const params = new URLSearchParams(window.location.search);
-  const nomArg = params.get("nom")
-  const deadlineArg = params.get("deadline")
-  const urlBase = window.location.origin
+  
   const [urlPerso, setUrlPerso]= useState('')
 
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nomArg = params.get("nom")
+    const deadlineArg = params.get("deadline")
+    const urlBase = window.location.origin
     if (nomArg) {setLoading(true); setIsSelecting(false)}
     
     const initiate = async () => {
-      
+      if (nomArg) await handleCalculate();
       if(deadlineArg) setDeadline(deadlineArg)
       if (nomArg) setNom(nomArg) 
       await fetchUrlListe()
-      if (nomArg) await handleCalculate();
+      
       setUrlPerso(`${urlBase}?nom=${nom}&deadline=${deadline}`)
     };
     initiate();
-  }, [nomArg, nom, url])
+  }, [ nom, url])
   const fetchUrlListe = async () => {
     const urls= await getUrlListe();
     const urlSearch = (nom ? urls[nom] : undefined) || " "
@@ -61,19 +62,21 @@ export default function Home() {
 
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Impossible de récupérer le fichier ICS. Vérifiez l\'URL ou les restrictions CORS.');
+      if (!response.ok) throw new Error('Impossible de récupérer le fichier ICS. Vérifiez l\'URL');
       
       const icsText = await response.text();
-      
-      // Étape 2 : Calculer
+        // Validate that the response is a valid ICS file
+      if (!icsText.trim().startsWith('BEGIN:VCALENDAR')) {
+        return
+      }
       const deadlineDate = new Date(deadline);
-      console.log("test", deadline, deadlineDate)
       const result = calculerHeuresTotales(icsText, deadlineDate);
       
 
       setHeures(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
+      console.error(err)
     } finally {
       setLoading(false);
     }
@@ -96,7 +99,7 @@ export default function Home() {
             <select name="url" onChange={(e) =>{setUrl( e.target.value ); setNom(e.target.options[e.target.selectedIndex].textContent)}} className="bg-gray-200 p-2 rounded-lg shadow w-full max-w-md">
               <option value="">Selectionnez un emploi du temps</option>
               {Object.entries(urlListe).map(([nom, url]) => (
-                <option value={String(url)}>{nom}</option>
+                <option key={nom} value={String(url)}>{nom}</option>
               ))}
               <option value="" onClick={()=> {setIsAdding(true); setIsSelecting(false)}}>+ Ajouter un emploi du temps</option>
               
@@ -155,7 +158,7 @@ export default function Home() {
               <p className="text-4 font-bold text-green-700">Total de congés : {heures?.totalConges}</p>
               <br />
               {Array.from(heures.cours.entries()).map(([nom,nb])=>(
-                <p className="text-4 font-bold text-green-700">
+                <p key={nom} className="text-4 font-bold text-green-700">
                   {nom} : {nb} h
                 </p>
               ))}

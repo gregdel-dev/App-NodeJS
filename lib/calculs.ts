@@ -15,11 +15,11 @@ export function calculerHeuresTotales(icsText: string, deadline : Date){
     vevents.forEach((vevent)=>{
         const event = new ICAL.Event(vevent);
 
-        //if (event.startDate.toJSDate().getDate()===new Date("2026-03-31").getDate()) console.log(event.summary,event.startDate.toJSDate(), event.startDate.toJSDate().toDateString())
+        
 
         if (pasUnDoublon(event)) {
             const startDate=event.startDate.toJSDate()
-            //console.log(event.description)
+            
             
             if (startDate< deadline && startDate> new Date()){
                 
@@ -30,7 +30,7 @@ export function calculerHeuresTotales(icsText: string, deadline : Date){
                     if(!weeks.includes(getWeekNumber(event.startDate.toJSDate())) && event.summary!==" ") {
                         heures.totalSemaines+=1
                         weeks.push(getWeekNumber(event.startDate.toJSDate()))
-                        console.log(getWeekNumber(event.startDate.toJSDate()), startDate, deadline, new Date())
+                        
                     }
 
                 }
