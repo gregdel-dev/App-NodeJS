@@ -96,12 +96,22 @@ export default function Home() {
           <div className='space-y-3'>
             <div>
             <p>Emploi du temps</p>
-            <select name="url" onChange={(e) =>{setUrl( e.target.value ); setNom(e.target.options[e.target.selectedIndex].textContent)}} className="bg-gray-200 p-2 rounded-lg shadow w-full max-w-md">
+            <select name="url" onChange={(e) => {
+              const selectedOption = e.target.options[e.target.selectedIndex];
+              const selectedText = selectedOption.textContent;
+              if (selectedText === '+ Ajouter un emploi du temps') {
+                setIsAdding(true);
+                setIsSelecting(false);
+              } else {
+                setUrl(e.target.value);
+                setNom(selectedText);
+              }
+            }} className="bg-gray-200 p-2 rounded-lg shadow w-full max-w-md">
               <option value="">Selectionnez un emploi du temps</option>
               {Object.entries(urlListe).map(([nom, url]) => (
                 <option key={nom} value={String(url)}>{nom}</option>
               ))}
-              <option value="" onClick={()=> {setIsAdding(true); setIsSelecting(false)}}>+ Ajouter un emploi du temps</option>
+              <option value="add-new">+ Ajouter un emploi du temps</option>
               
             </select>
             </div>
