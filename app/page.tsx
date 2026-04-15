@@ -10,7 +10,7 @@ import { addUrl, getUrlListe } from '@/lib/fonctions';
 export default function Home() {
   const [url, setUrl] = useState('');
   const [urlListe, setUrlListe] = useState({})
-  const [deadline, setDeadline] = useState("2026-06-06");
+  const [deadline, setDeadline] = useState("2026-06-05");
   const [heures, setHeures] = useState<Heures | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -116,7 +116,7 @@ export default function Home() {
             </select>
             </div>
               <div>
-            <p>Date de fin</p>
+            <p>Date de fin (exclue)</p>
             <input
               type="date"
               defaultValue={new Date(deadline).toISOString().split("T")[0]}
