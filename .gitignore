@@ -41,3 +41,5 @@ data.json
 *.tsbuildinfo
 next-env.d.ts
 /data
+test-api.js
+package-lock.json
