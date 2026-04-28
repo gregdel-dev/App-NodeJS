@@ -22,8 +22,8 @@ async function testPost() {
       headers: { 'Content-Type': 'application/json', "x-api-key":"Y+gI#lSP8N&faclf+O?h6geGu@-3truxi0uvunUsTihajud", "User-Agent": "Mozilla/5.0 (Linux; Android $version; $manufacturer $model) GregApp"},
       body: JSON.stringify(data)
     });
-    //const result = await response_Post
-    const result = await response.json();
+    const result = await response_Post
+    //const result = await response.json();
     
     if (response.ok) {
       console.log('✅ Succès:', result);
