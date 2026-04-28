@@ -2,7 +2,7 @@
 async function testPost() {
   const data = {
     id_emplacement: 2,
-    code_barre : "3024360123459e",
+    code_barre : "3024360123459erth",
     date_peremption : "2026-123",
     quantite : 15,
     nom : "un nom",
@@ -12,12 +12,12 @@ async function testPost() {
   };
 
   try {
-    const response = await fetch('http://localhost:3000/api/data_gestion/get/produit', {
+    const response = await fetch('http://stock.gregdel.fr/api/data_gestion/get/produit', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json', "x-api-key":"Y+gI#lSP8N&faclf+O?h6geGu@-3truxi0uvunUsTihajud", "User-Agent": "Mozilla/5.0 (Linux; Android $version; $manufacturer $model) GregApp"},
       //body: JSON.stringify(data)
     });
-    const response_Post =await fetch('http://localhost:3000/api/data_gestion/ajout/emplacement', {
+    const response_Post =await fetch('https://stock.gregdel.fr/api/data_gestion/ajout/produit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', "x-api-key":"Y+gI#lSP8N&faclf+O?h6geGu@-3truxi0uvunUsTihajud", "User-Agent": "Mozilla/5.0 (Linux; Android $version; $manufacturer $model) GregApp"},
       body: JSON.stringify(data)
